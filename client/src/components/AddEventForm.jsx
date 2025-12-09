@@ -76,8 +76,8 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
                 await axios.post(`${API_URL}/events`, payload, config);
             }
 
-            onEventAdded();
-            onCancel();
+            if (onRefresh) onRefresh();
+            onClose();
         } catch (err) {
             console.error('Save Event Error:', err);
             console.log('Error Response:', err.response?.data);

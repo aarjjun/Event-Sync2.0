@@ -122,7 +122,7 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
                 </div>
 
                 {/* HOD Actions Area */}
-                {isHOD && isPending && (
+                {isHOD && (isPending || event.status === 'rejected') && (
                     <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-t border-[var(--border-color)] space-y-4">
                         <h3 className="text-sm font-semibold text-[var(--text-primary)]">HOD Actions</h3>
 
