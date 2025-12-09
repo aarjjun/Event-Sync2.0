@@ -42,7 +42,10 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
         } catch (err) {
             console.error(err);
-            return { success: false, error: err.response?.data?.msg || 'Login failed' };
+            const errorMsg = err.response?.data?.msg
+                || (err.message === "Network Error" ? "Network Error: Mobile cannot reach Localhost. Check Vercel Env Vars." : err.message)
+                || 'Login failed';
+            return { success: false, error: errorMsg };
         }
     };
 
