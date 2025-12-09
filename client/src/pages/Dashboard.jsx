@@ -9,6 +9,7 @@ import AddEventForm from '../components/AddEventForm';
 import { useAuth } from '../context/AuthContext';
 import { Plus } from 'lucide-react';
 import ExportControls from '../components/ExportControls';
+import API_URL from '../config';
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -20,7 +21,7 @@ export default function Dashboard() {
 
     const fetchEvents = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/events');
+            const res = await axios.get(`${API_URL}/events`);
             let data = res.data;
 
             // Student only sees approved events

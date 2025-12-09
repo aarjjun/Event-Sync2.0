@@ -1,6 +1,7 @@
 import { X, Check, XCircle, Clock, Calendar, MapPin, Building, Users, FileText, Edit } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import API_URL from '../config';
 import { useState } from 'react';
 
 export default function EventModal({ event, onClose, onRefresh, onEdit }) {
@@ -17,7 +18,7 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
     const handleAction = async (newStatus, reason = '', suggestedDate = '') => {
         setUpdating(true);
         try {
-            await axios.put(`http://localhost:5000/api/events/${event._id}`, {
+            await axios.put(`${API_URL}/events/${event._id}`, {
                 status: newStatus,
                 rejectionReason: reason,
                 suggestedDate: suggestedDate

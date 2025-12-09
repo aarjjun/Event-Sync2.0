@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { X, Calendar, Clock, MapPin, Link, FileText, Users, Type } from 'lucide-react';
+import API_URL from '../config';
 
 export default function AddEventForm({ onClose, onRefresh, eventToEdit, events = [] }) {
     const { user } = useAuth();
@@ -57,6 +58,9 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
 
         setLoading(true);
         try {
+            const token = localStorage.getItem('token');
+            const config = { headers: { 'x-auth-token': token } };
+
             const payload = {
                 ...formData,
                 createdBy: eventToEdit?.createdBy || user.id
@@ -67,16 +71,17 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
             }
 
             if (eventToEdit) {
-                await axios.put(`http://localhost:5000/api/events/${eventToEdit._id}`, payload);
+                await axios.put(`${API_URL}/events/${eventToEdit._id}`, payload, config);
             } else {
-                await axios.post('http://localhost:5000/api/events', payload);
+                await axios.post(`${API_URL}/events`, payload, config);
             }
 
-            onRefresh();
-            onClose();
+            onEventAdded();
+            onCancel();
         } catch (err) {
-            console.error(err);
-            alert('Failed to save event');
+            console.error('Save Event Error:', err);
+            console.log('Error Response:', err.response?.data);
+            alert(`Failed to save event: ${err.response?.data?.msg || err.message}`);
         } finally {
             setLoading(false);
         }

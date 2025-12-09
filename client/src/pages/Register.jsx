@@ -5,6 +5,8 @@ import { Calendar, User, Lock, ArrowRight, Users } from 'lucide-react';
 import SilkShader from '../components/ui/SilkShader';
 import { RainbowButton } from '../components/ui/RainbowButton';
 
+import API_URL from '../config';
+
 const Register = () => {
     const [formData, setFormData] = useState({
         username: '',
@@ -19,7 +21,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/auth/register', formData);
+            await axios.post(`${API_URL}/auth/register`, formData);
             navigate('/login');
         } catch (err) {
             setError(err.response?.data?.msg || 'Registration failed');

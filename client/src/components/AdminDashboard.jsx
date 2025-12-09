@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import API_URL from '../config';
 import { Users, Shield, Award, UserCheck } from 'lucide-react';
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const { user: currentUser } = useAuth();
-    const token = localStorage.getItem('token');
+    // const token = localStorage.getItem('token'); // This variable is no longer needed as token is fetched directly
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/auth/users', {
-                headers: { 'x-auth-token': token }
+            const res = await axios.get(`${API_URL}/auth/users`, {
+                headers: { 'x-auth-token': localStorage.getItem('token') }
             });
             setUsers(res.data);
         } catch (err) {
@@ -29,13 +30,15 @@ export default function AdminDashboard() {
     const handleRoleChange = async (userId, newRole) => {
         if (!confirm(`Are you sure you want to promote/demote this user to ${newRole}?`)) return;
         try {
-            await axios.put(`http://localhost:5000/api/auth/users/${userId}/role`,
+            await axios.put(`${API_URL}/auth/users/${userId}/role`,
                 { role: newRole },
-                { headers: { 'x-auth-token': token } }
+                { headers: { 'x-auth-token': localStorage.getItem('token') } }
             );
             fetchUsers();
         } catch (err) {
-            alert('Failed to update role');
+            console.error('Update Role Error:', err);
+            console.log('Error Details:', err.response?.data);
+            alert(`Failed to update role: ${err.response?.data?.msg || err.message}`);
         }
     };
 

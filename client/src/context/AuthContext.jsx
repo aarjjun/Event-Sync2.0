@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import API_URL from '../config';
 
 const AuthContext = createContext();
 
@@ -16,14 +17,19 @@ export const AuthProvider = ({ children }) => {
         const id = localStorage.getItem('userId');
 
         if (token) {
-            setUser({ token, role, community: community === 'undefined' ? null : community, id });
+            setUser({
+                token,
+                role: role === 'undefined' ? null : role,
+                community: community === 'undefined' ? null : community,
+                id: id === 'undefined' ? null : id
+            });
         }
         setLoading(false);
     }, []);
 
     const login = async (username, password) => {
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+            const res = await axios.post(`${API_URL}/auth/login`, { username, password });
 
             const { token, role, community, id } = res.data;
 
