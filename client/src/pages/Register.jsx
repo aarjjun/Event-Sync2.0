@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Calendar, User, Lock, ArrowRight, Users } from 'lucide-react';
+import SilkShader from '../components/ui/SilkShader';
+import { RainbowButton } from '../components/ui/RainbowButton';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -25,12 +27,16 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0f172a] relative overflow-hidden">
-            <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/30 rounded-full blur-[100px]" />
-            <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px]" />
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+            <SilkShader />
 
-            <div className="relative z-10 w-full max-w-md p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
+            <div className="relative z-10 w-full max-w-md p-8 bg-black/20 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-500">
                 <div className="text-center mb-8">
+                    <div className="flex justify-center mb-4">
+                        <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                            <img src="/logo.png" alt="Logo" className="w-12 h-12 object-contain" />
+                        </div>
+                    </div>
                     <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
                     <p className="text-gray-400">Join EventSync as a Student</p>
                 </div>
@@ -92,13 +98,15 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <button
+                    <RainbowButton
                         type="submit"
-                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/25 transition-all duration-200 flex items-center justify-center gap-2 group"
+                        className="w-full py-4 text-white font-bold rounded-lg shadow-lg"
                     >
-                        Sign Up
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                        <span className="flex items-center gap-2">
+                            Sign Up
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                    </RainbowButton>
 
                     <div className="text-center text-sm text-gray-400">
                         Already have an account? <Link to="/login" className="text-blue-400 hover:text-blue-300">Login</Link>

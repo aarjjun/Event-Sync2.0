@@ -7,6 +7,7 @@ const EventSchema = new mongoose.Schema({
     description: { type: String, required: true },
     date: { type: String, required: true }, // Keeping as String for simplicity with FullCalendar or Date object? Spec says structure has date string.
     time: { type: String, required: true },
+    endTime: { type: String, required: true },
     room: { type: String, required: true },
     posterLink: { type: String, required: true },
     registrationLink: { type: String },

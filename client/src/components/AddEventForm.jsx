@@ -15,6 +15,7 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
         description: eventToEdit?.description || '',
         date: eventToEdit?.date || '',
         time: eventToEdit?.time || '',
+        endTime: eventToEdit?.endTime || '',
         room: eventToEdit?.room || '',
         posterLink: eventToEdit?.posterLink || '',
         registrationLink: eventToEdit?.registrationLink || ''
@@ -22,8 +23,8 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
 
     // Check for room conflict when date, time, or room changes
     const checkConflict = (newData) => {
-        const { date, room, time } = newData;
-        if (!date || !room || !time) {
+        const { date, room, time, endTime } = newData;
+        if (!date || !room || !time || !endTime) {
             setConflict(null);
             return;
         }
@@ -127,15 +128,20 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2"><Calendar className="w-4 h-4" /> Date</label>
                                 <input type="date" name="date" required value={formData.date} onChange={handleChange}
                                     className="w-full px-4 py-2 border dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-800 text-black dark:text-white" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2"><Clock className="w-4 h-4" /> Time</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2"><Clock className="w-4 h-4" /> Start Time</label>
                                 <input type="time" name="time" required value={formData.time} onChange={handleChange}
+                                    className="w-full px-4 py-2 border dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-800 text-black dark:text-white" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2"><Clock className="w-4 h-4" /> End Time</label>
+                                <input type="time" name="endTime" required value={formData.endTime} onChange={handleChange}
                                     className="w-full px-4 py-2 border dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-800 text-black dark:text-white" />
                             </div>
                             <div>

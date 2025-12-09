@@ -34,13 +34,14 @@ router.put('/:id', async (req, res) => {
         let event = await Event.findById(req.params.id);
         if (!event) return res.status(404).json({ msg: 'Event not found' });
 
-        const { status, rejectionReason, suggestedDate, suggestedRoom } = req.body;
+        const { status, rejectionReason, suggestedDate, suggestedRoom, endTime } = req.body;
 
         const updateFields = {};
         if (status) updateFields.status = status;
         if (rejectionReason) updateFields.rejectionReason = rejectionReason;
         if (suggestedDate) updateFields.suggestedDate = suggestedDate;
         if (suggestedRoom) updateFields.suggestedRoom = suggestedRoom;
+        if (endTime) updateFields.endTime = endTime;
 
         // TODO: authorization check
 

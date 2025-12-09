@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Calendar, User, Lock, ArrowRight } from 'lucide-react';
 
+import SilkShader from '../components/ui/SilkShader';
+import { RainbowButton } from '../components/ui/RainbowButton';
+
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -21,16 +24,18 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0f172a] relative overflow-hidden">
-            {/* Background Gradients */}
-            <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-purple-500/30 rounded-full blur-[100px]" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px]" />
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+            <SilkShader />
 
-            <div className="relative z-10 w-full max-w-md p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
+            {/* Background Gradients - Removed in favor of SilkShader */}
+            {/* <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-purple-500/30 rounded-full blur-[100px]" /> */}
+            {/* <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px]" /> */}
+
+            <div className="relative z-10 w-full max-w-md p-8 bg-black/20 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-500">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-4">
                         <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                            <Calendar className="w-8 h-8 text-white" />
+                            <img src="/logo.png" alt="Logo" className="w-12 h-12 object-contain" />
                         </div>
                     </div>
                     <h1 className="text-3xl font-bold text-white mb-2">EventSync</h1>
@@ -74,13 +79,15 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <button
+                    <RainbowButton
                         type="submit"
-                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/25 transition-all duration-200 flex items-center justify-center gap-2 group"
+                        className="w-full py-4 text-white font-bold rounded-lg shadow-lg"
                     >
-                        Sign In
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                        <span className="flex items-center gap-2">
+                            Sign In
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                    </RainbowButton>
                 </form>
 
                 {/* Optional Seed Link or Hint */}
