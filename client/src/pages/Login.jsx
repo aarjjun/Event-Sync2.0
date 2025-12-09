@@ -5,7 +5,6 @@ import { Calendar, User, Lock, ArrowRight } from 'lucide-react';
 
 import SilkShader from '../components/ui/SilkShader';
 import { RainbowButton } from '../components/ui/RainbowButton';
-import API_URL from '../config';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -94,12 +93,6 @@ const Login = () => {
                 {/* Optional Seed Link or Hint */}
                 <div className="mt-6 text-center text-xs text-gray-500">
                     Need an account? <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">Create Student Account</Link>
-                </div>
-
-                {/* DEBUG: Remove before final production */}
-                <div className="mt-4 p-2 bg-black/50 rounded text-[10px] text-gray-500 font-mono text-center break-all">
-                    Debug Config: {import.meta.env.VITE_API_URL ? "Env Var Set" : "Fallback Active"} <br />
-                    Target: {API_URL}
                 </div>
             </div>
         </div>
