@@ -12,12 +12,16 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['hod', 'rep', 'student', 'admin'],
+        enum: ['hod', 'rep', 'student', 'admin', 'teacher'],
         required: true
     },
     community: {
         type: String, // Only for 'rep'
         default: null
+    },
+    name: {
+        type: String,
+        default: function () { return this.username; } // Default to username for existing/new docs if not provided
     }
 }, { timestamps: true });
 

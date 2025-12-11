@@ -19,7 +19,8 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
         endTime: eventToEdit?.endTime || '',
         room: eventToEdit?.room || '',
         posterLink: eventToEdit?.posterLink || '',
-        registrationLink: eventToEdit?.registrationLink || ''
+        registrationLink: eventToEdit?.registrationLink || '',
+        targetAudience: eventToEdit?.targetAudience || 'student'
     });
 
     // Check for room conflict when date, time, or room changes
@@ -132,6 +133,23 @@ export default function AddEventForm({ onClose, onRefresh, eventToEdit, events =
                                 </select>
                             </div>
                         </div>
+
+                        {/* Target Audience (Only for HOD/Admin/Teacher) */}
+                        {user.role !== 'rep' && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2"><Users className="w-4 h-4" /> Target Audience</label>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="targetAudience" value="student" checked={formData.targetAudience === 'student'} onChange={handleChange} className="accent-blue-600" />
+                                        <span className="text-gray-800 dark:text-gray-200">Students</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="targetAudience" value="teacher" checked={formData.targetAudience === 'teacher'} onChange={handleChange} className="accent-blue-600" />
+                                        <span className="text-gray-800 dark:text-gray-200">Teachers Only</span>
+                                    </label>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>

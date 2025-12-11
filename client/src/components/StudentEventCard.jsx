@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, UserCheck } from 'lucide-react';
 
 export default function StudentEventCard({ event }) {
     return (
@@ -20,6 +20,11 @@ export default function StudentEventCard({ event }) {
                 <div className="absolute top-2 right-2 px-2 py-1 bg-white/90 backdrop-blur text-xs font-bold text-gray-800 rounded-md shadow-sm">
                     {event.type}
                 </div>
+                {event.isPast && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-red-600/90 backdrop-blur text-xs font-bold text-white rounded-md shadow-sm">
+                        COMPLETED
+                    </div>
+                )}
             </div>
 
             {/* Content */}
@@ -38,10 +43,21 @@ export default function StudentEventCard({ event }) {
                         <Clock className="w-4 h-4" />
                         <span>{event.time}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                        <MapPin className="w-4 h-4" />
-                        <span>{event.room}</span>
+                    <div className="flex items-center gap-2 text-slate-300">
+                        <MapPin className="w-4 h-4 text-purple-400" />
+                        <span className="text-sm truncate">{event.room}</span>
                     </div>
+
+                    {/* Creator Info */}
+                    {event.createdBy && (
+                        <div className="flex items-center gap-2 text-slate-400 mt-1">
+                            <UserCheck className="w-3.5 h-3.5 text-green-400" />
+                            <span className="text-xs">
+                                Added by: <span className="text-slate-300">{event.createdBy.name || event.createdBy.username}</span>
+                                {event.createdBy.community && <span className="text-slate-500"> ({event.createdBy.community})</span>}
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 <p className="text-sm text-[var(--text-secondary)] line-clamp-3 leading-relaxed">

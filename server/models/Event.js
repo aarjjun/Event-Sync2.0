@@ -25,6 +25,7 @@ const EventSchema = new mongoose.Schema({
     hodComments: { type: String },
 
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Rep who created it
+    targetAudience: { type: String, enum: ['student', 'teacher'], default: 'student', required: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', EventSchema);

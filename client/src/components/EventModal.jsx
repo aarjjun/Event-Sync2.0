@@ -1,4 +1,4 @@
-import { X, Check, XCircle, Clock, Calendar, MapPin, Building, Users, FileText, Edit } from 'lucide-react';
+import { X, Check, XCircle, Clock, Calendar, MapPin, Building, Users, FileText, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import API_URL from '../config';
@@ -10,10 +10,14 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
 
     if (!event) return null;
 
+    // Role based permissions
     const isHOD = user?.role === 'hod';
-    const isPending = event.status === 'pending';
-    const isCreator = user?.id === event.createdBy;
-    const canEdit = isHOD || isCreator;
+    const isOwner = user?.role === 'rep' && event.createdBy?._id === user.id;
+
+    // HOD can act on Pending OR Approved events (to revoke/edit)
+    const canApproveReject = isHOD && (event.status === 'pending' || event.status === 'approved');
+
+    const canEdit = isHOD || (isOwner && event.status === 'pending');
 
     const handleAction = async (newStatus, reason = '', suggestedDate = '') => {
         setUpdating(true);
@@ -27,6 +31,29 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
             onClose();
         } catch (err) {
             console.error('Failed to update event', err);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    // Add Trash2 to imports at top if not present, but for now I'll just use it in the snippet and rely on my own knowledge or check imports. 
+    // Imports: import { X, Check, XCircle, Clock, Calendar, MapPin, Building, Users, FileText, Edit, Trash2 } from 'lucide-react';
+
+    // Permission Logic
+    const canDelete = user?.role === 'admin' || user?.role === 'hod' || (event.createdBy?._id === user?.id);
+
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this event? This cannot be undone.')) return;
+        setUpdating(true);
+        try {
+            await axios.delete(`${API_URL}/events/${event._id}`, {
+                headers: { 'x-auth-token': localStorage.getItem('token') }
+            });
+            onRefresh();
+            onClose();
+        } catch (err) {
+            console.error('Failed to delete', err);
+            alert('Failed to delete event');
         } finally {
             setUpdating(false);
         }
@@ -48,6 +75,11 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
                         <h2 className="text-2xl font-bold text-[var(--text-primary)] mt-1">{event.title}</h2>
                     </div>
                     <div className="flex gap-2">
+                        {canDelete && (
+                            <button onClick={handleDelete} disabled={updating} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full transition-colors hidden md:block" title="Delete Event">
+                                <Trash2 className="w-5 h-5 text-red-500" />
+                            </button>
+                        )}
                         {canEdit && (
                             <button onClick={() => onEdit(event)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-colors hidden md:block" title="Edit Event">
                                 <Edit className="w-5 h-5 text-[var(--text-secondary)]" />
@@ -96,6 +128,12 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
                             <Users className="w-5 h-5 text-blue-500" />
                             <span>{event.community} ({event.type})</span>
                         </div>
+                        {event.createdBy && (
+                            <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                                <Users className="w-5 h-5 text-green-500" />
+                                <span>Added by: {event.createdBy.name || event.createdBy.username}</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Description */}
@@ -105,10 +143,21 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
                     </div>
 
                     {/* Rejection Reason (if rejected) */}
-                    {event.status === 'rejected' && event.rejectionReason && (
+                    {(event.status === 'rejected' || event.status === 'approved') && event.rejectionReason && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <h3 className="text-sm font-semibold text-red-800 mb-1">Rejection Reason</h3>
+                            <h3 className="text-sm font-semibold text-red-800 mb-1">Feedback from HOD</h3>
                             <p className="text-red-600 text-sm">{event.rejectionReason}</p>
+                        </div>
+                    )}
+
+                    {/* HOD Suggested Date */}
+                    {event.suggestedDate && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
+                            <Calendar className="w-5 h-5 text-yellow-600" />
+                            <div>
+                                <h3 className="text-sm font-semibold text-yellow-800">Suggested Date Change</h3>
+                                <p className="text-yellow-700 text-sm">HOD suggests rescheduling to: <strong>{event.suggestedDate}</strong></p>
+                            </div>
                         </div>
                     )}
 
@@ -122,7 +171,7 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
                 </div>
 
                 {/* HOD Actions Area */}
-                {isHOD && (isPending || event.status === 'rejected') && (
+                {isHOD && (event.status === 'pending' || event.status === 'rejected' || event.status === 'approved') && (
                     <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-t border-[var(--border-color)] space-y-4">
                         <h3 className="text-sm font-semibold text-[var(--text-primary)]">HOD Actions</h3>
 

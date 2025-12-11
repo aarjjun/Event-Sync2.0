@@ -130,6 +130,11 @@ const ModernEventCard = ({ event }) => {
                             <Zap className="w-3 h-3 fill-current" /> LIVE
                         </div>
                     )}
+                    {event.isPast && (
+                        <div className="px-3 py-1 bg-gray-600/90 backdrop-blur-md text-xs font-bold text-white rounded-full shadow-lg flex items-center gap-1">
+                            COMPLETED
+                        </div>
+                    )}
                     <div className="px-3 py-1 bg-white/90 backdrop-blur-md text-xs font-bold text-gray-800 rounded-full shadow-lg">
                         {event.community}
                     </div>
@@ -142,6 +147,11 @@ const ModernEventCard = ({ event }) => {
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
                         <Clock className="w-3 h-3" /> {event.date} • {event.time} - {event.endTime}
                     </span>
+                    {event.createdBy && (
+                        <span className="text-xs text-gray-400 ml-auto">
+                            Added by: <span className="font-semibold text-gray-600 dark:text-gray-300">{event.createdBy.name || event.createdBy.username}</span>
+                        </span>
+                    )}
                 </motion.div>
 
                 <motion.h3 layout className="text-xl font-bold text-gray-800 dark:text-white leading-tight mb-2">
