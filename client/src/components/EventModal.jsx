@@ -26,6 +26,8 @@ export default function EventModal({ event, onClose, onRefresh, onEdit }) {
                 status: newStatus,
                 rejectionReason: reason,
                 suggestedDate: suggestedDate
+            }, {
+                headers: { 'x-auth-token': localStorage.getItem('token') }
             });
             onRefresh();
             onClose();

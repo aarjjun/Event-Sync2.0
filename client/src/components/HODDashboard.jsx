@@ -9,8 +9,13 @@ export default function HODDashboard() {
     const [loading, setLoading] = useState(true);
     const { user: currentUser } = useAuth();
     const [showPromoteModal, setShowPromoteModal] = useState(false);
+    const [showRenameModal, setShowRenameModal] = useState(false);
+    const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+
     const [selectedUser, setSelectedUser] = useState(null);
     const [promoteCommunity, setPromoteCommunity] = useState('');
+    const [newName, setNewName] = useState('');
+    const [newPassword, setNewPassword] = useState('');
 
     const fetchUsers = async () => {
         try {
@@ -39,6 +44,18 @@ export default function HODDashboard() {
         setShowPromoteModal(true);
     };
 
+    const handleRenameClick = (user) => {
+        setSelectedUser(user);
+        setNewName(user.name || user.username);
+        setShowRenameModal(true);
+    };
+
+    const handleResetPasswordClick = (user) => {
+        setSelectedUser(user);
+        setNewPassword('');
+        setShowResetPasswordModal(true);
+    };
+
     const handlePromoteConfirm = async () => {
         if (!promoteCommunity) {
             alert("Please specify a community for the Rep.");
@@ -54,6 +71,36 @@ export default function HODDashboard() {
         } catch (err) {
             console.error('Promote Error:', err);
             alert('Failed to promote user');
+        }
+    };
+
+    const handleRenameConfirm = async () => {
+        if (!newName.trim()) return alert("Name cannot be empty");
+        try {
+            await axios.put(`${API_URL}/auth/users/${selectedUser._id}/profile-admin`,
+                { name: newName },
+                { headers: { 'x-auth-token': localStorage.getItem('token') } }
+            );
+            setShowRenameModal(false);
+            fetchUsers();
+        } catch (err) {
+            console.error('Rename Error:', err);
+            alert('Failed to rename user');
+        }
+    };
+
+    const handleResetPasswordConfirm = async () => {
+        if (!newPassword || newPassword.length < 6) return alert("Password must be at least 6 characters");
+        try {
+            await axios.put(`${API_URL}/auth/users/${selectedUser._id}/reset-password`,
+                { newPassword },
+                { headers: { 'x-auth-token': localStorage.getItem('token') } }
+            );
+            setShowResetPasswordModal(false);
+            alert(`Password for ${selectedUser.username} has been reset.`);
+        } catch (err) {
+            console.error('Reset Password Error:', err);
+            alert('Failed to reset password');
         }
     };
 
@@ -80,7 +127,7 @@ export default function HODDashboard() {
                     <Shield className="w-6 h-6 text-red-600" />
                     HOD Management Panel
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage Community Representatives and Teachers</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage Community Representatives, Teachers, and Students</p>
             </div>
 
             <div className="overflow-x-auto">
@@ -96,21 +143,36 @@ export default function HODDashboard() {
                     <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                         {users.map(u => (
                             <tr key={u._id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                                <td className="px-6 py-4 dark:text-gray-200 font-medium">{u.username}</td>
+                                <td className="px-6 py-4 dark:text-gray-200">
+                                    <div className="font-medium text-gray-900 dark:text-white">{u.name}</div>
+                                    <div className="text-xs text-gray-500">{u.username}</div>
+                                </td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
                                         ${u.role === 'rep' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                                            'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'}`}>
+                                            u.role === 'teacher' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                                'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'}`}>
                                         {u.role}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 dark:text-gray-300">{u.community || '-'}</td>
-                                <td className="px-6 py-4 flex justify-center gap-2">
+                                <td className="px-6 py-4 flex flex-wrap justify-center gap-2">
+                                    {/* Manage: Rename & Reset Password (For Everyone managed) */}
+                                    <button onClick={() => handleRenameClick(u)}
+                                        className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded border border-gray-200 transition-colors">
+                                        Rename
+                                    </button>
+                                    <button onClick={() => handleResetPasswordClick(u)}
+                                        className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded border border-gray-200 transition-colors">
+                                        Reset Pass
+                                    </button>
+
+                                    {/* Role Actions */}
                                     {u.role === 'student' && (
                                         <>
                                             <button onClick={() => handlePromoteClick(u)}
-                                                className="flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded border border-blue-200 text-xs font-semibold transition-colors">
-                                                <ArrowUpCircle className="w-3 h-3" /> Make Rep
+                                                className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors">
+                                                Make Rep
                                             </button>
                                             <button onClick={() => {
                                                 if (confirm(`Promote ${u.username} to Teacher?`)) {
@@ -120,15 +182,16 @@ export default function HODDashboard() {
                                                     ).then(() => fetchUsers());
                                                 }
                                             }}
-                                                className="flex items-center gap-1 px-3 py-1 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded border border-yellow-200 text-xs font-semibold transition-colors">
-                                                <ArrowUpCircle className="w-3 h-3" /> Make Teacher
+                                                className="px-2 py-1 text-xs font-medium text-yellow-600 bg-yellow-50 hover:bg-yellow-100 rounded border border-yellow-200 transition-colors">
+                                                Make Teacher
                                             </button>
                                         </>
                                     )}
-                                    {u.role === 'rep' && (
+                                    {/* Demote Rep OR Teacher */}
+                                    {(u.role === 'rep' || u.role === 'teacher') && (
                                         <button onClick={() => handleDemoteClick(u)}
-                                            className="flex items-center gap-1 px-3 py-1 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded border border-gray-200 text-xs font-semibold transition-colors">
-                                            <ArrowDownCircle className="w-3 h-3" /> Demote
+                                            className="px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition-colors">
+                                            Demote
                                         </button>
                                     )}
                                 </td>
@@ -165,6 +228,72 @@ export default function HODDashboard() {
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/25 transition-all"
                             >
                                 Confirm Promotion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Rename Modal */}
+            {showRenameModal && (
+                <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold mb-4 dark:text-white">Rename User</h3>
+                        <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                            New full name for <strong>{selectedUser?.username}</strong>:
+                        </p>
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            className="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg mb-6 bg-gray-50/50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                        />
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowRenameModal(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors dark:text-gray-300 dark:hover:bg-slate-700"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRenameConfirm}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/25 transition-all"
+                            >
+                                Save Name
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reset Password Modal */}
+            {showResetPasswordModal && (
+                <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold mb-4 dark:text-white text-red-600">Reset Password</h3>
+                        <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                            Enter a new password for <strong>{selectedUser?.username}</strong>.
+                            <br /><span className="text-xs text-red-500">Warning: This will overwrite their current password.</span>
+                        </p>
+                        <input
+                            type="text"
+                            placeholder="New Password (min 6 chars)"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg mb-6 bg-gray-50/50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                        />
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowResetPasswordModal(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors dark:text-gray-300 dark:hover:bg-slate-700"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleResetPasswordConfirm}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium shadow-lg shadow-red-500/25 transition-all"
+                            >
+                                Reset Password
                             </button>
                         </div>
                     </div>

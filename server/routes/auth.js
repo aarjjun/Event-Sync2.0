@@ -103,15 +103,22 @@ router.put('/users/:id/role', async (req, res) => {
         if (!token) return res.status(401).json({ msg: 'No token, authorization denied' });
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Allow Admin OR HOD to update roles (HOD restricted to Student<->Rep)
+        // Allow Admin OR HOD to update roles
         if (decoded.user.role !== 'admin' && decoded.user.role !== 'hod') {
             return res.status(403).json({ msg: 'Access denied' });
         }
 
         const { role, community } = req.body;
+        const targetUser = await User.findById(req.params.id);
+        if (!targetUser) return res.status(404).json({ msg: 'User not found' });
 
-        // Security: HOD cannot promote to Admin or HOD
+        // Security: HOD Restraints
         if (decoded.user.role === 'hod') {
+            // Cannot change role of an Admin or another HOD
+            if (targetUser.role === 'admin' || targetUser.role === 'hod') {
+                return res.status(403).json({ msg: 'HODs cannot modify Admin or HOD accounts.' });
+            }
+            // Cannot promote TO Admin or HOD
             if (role === 'admin' || role === 'hod') {
                 return res.status(403).json({ msg: 'HODs cannot promote users to Admin/HOD level.' });
             }
@@ -135,16 +142,27 @@ router.put('/users/:id/role', async (req, res) => {
     }
 });
 
-// Admin: Reset User Password (Manual Override)
+// Admin/HOD: Reset User Password (Manual Override)
 router.put('/users/:id/reset-password', async (req, res) => {
     try {
         const token = req.header('x-auth-token');
         if (!token) return res.status(401).json({ msg: 'No token, authorization denied' });
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Strict Admin Only Check
-        if (decoded.user.role !== 'admin') {
-            return res.status(403).json({ msg: 'Access denied. Admins only.' });
+
+        // Allow Admin OR HOD
+        if (decoded.user.role !== 'admin' && decoded.user.role !== 'hod') {
+            return res.status(403).json({ msg: 'Access denied. Admins/HODs only.' });
+        }
+
+        const targetUser = await User.findById(req.params.id);
+        if (!targetUser) return res.status(404).json({ msg: 'User not found' });
+
+        // Security: HOD Restrictions
+        if (decoded.user.role === 'hod') {
+            if (targetUser.role === 'admin' || targetUser.role === 'hod') {
+                return res.status(403).json({ msg: 'HODs cannot reset Admin/HOD passwords.' });
+            }
         }
 
         const { newPassword } = req.body;
@@ -211,9 +229,6 @@ router.put('/profile', async (req, res) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ msg: 'User not found' });
 
-        // Policy: Users can only set their name once. If current name != username, it means it's already set (Verified).
-        // Exception: If they are setting it to the SAME value (idempotent), allow it, or just return success.
-        // Or if they are Admin/HOD? No, this is the USER self-update route.
         if (user.name && user.name !== user.username) {
             return res.status(403).json({ msg: 'Name is already verified and cannot be changed. Contact Admin/HOD.' });
         }
@@ -221,7 +236,6 @@ router.put('/profile', async (req, res) => {
         user.name = name;
         await user.save();
 
-        // Return updated user object (sanitize password)
         const updatedUser = user.toObject();
         delete updatedUser.password;
 
@@ -270,7 +284,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Admin: Update User Profile (Force Name Change etc)
+// Admin/HOD: Update User Profile (Force Name Change etc)
 router.put('/users/:id/profile-admin', async (req, res) => {
     try {
         const token = req.header('x-auth-token');
@@ -280,6 +294,16 @@ router.put('/users/:id/profile-admin', async (req, res) => {
         // Strict Admin Only Check
         if (decoded.user.role !== 'admin' && decoded.user.role !== 'hod') {
             return res.status(403).json({ msg: 'Access denied. Admins/HODs only.' });
+        }
+
+        const targetUser = await User.findById(req.params.id);
+        if (!targetUser) return res.status(404).json({ msg: 'User not found' });
+
+        // Security: HOD Restraints
+        if (decoded.user.role === 'hod') {
+            if (targetUser.role === 'admin' || targetUser.role === 'hod') {
+                return res.status(403).json({ msg: 'HODs cannot modify Admin/HOD accounts.' });
+            }
         }
 
         const { name } = req.body;
